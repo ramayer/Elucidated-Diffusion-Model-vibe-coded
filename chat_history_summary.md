@@ -41,7 +41,7 @@ The conversation involved implementing both DDPM and EDM diffusion models in a J
 | 26 || Sadly my current model's not converging as fast as I hoped. Can we tweak the data loader to feed it MNIST data - that was just padded to 64x64? | Absolutely — that’s a classic trick for quick convergence testing: start with simple data like MNIST (but resized to your target 64×64) before moving to complex RGB datasets. | If you want, the next step is to rewrite your training loop for EDM using these functions so it works for 64×64 RGB images. Do you want me to do that? |  |  |
 | 27 || Sure | Perfect — let’s rewrite your EDM training loop [and WHOA! It went off the rails writing a DIFFERENT improved difusion model from based on other papers.  Worked, but not what I wanted] |  |  |
 | 27 || Waitasec... yours looks different than mine. Mine looked more complex like: ... could you compare and contrast the differences. I tried basing it on https://arxiv.org/pdf/2206.00364 | Ah — yes, now I see what’s happening. The difference comes down to how NVIDIA’s “Elucidated Diffusion Model” (EDM) does preconditioning versus a simpler “direct noise prediction” training loop. Let’s break it down carefully. ... The loop is already fully compatible with 64×64 RGB. |  |  |
-| 28 || 
+| 28 || Thanks!  It works! | | | |
 
 
 
