@@ -33,7 +33,8 @@ The conversation involved implementing both DDPM and EDM diffusion models in a J
 | 21 | Human/AI | Wow!  Thx!   You're awesome.   How do I save this entire chat history to a file that can be put in github? | Thank you! I'm glad we got the EDM implementation working correctly! <br><br>To save this chat history for GitHub, you have a few good options:<br><br>## Option 1: Export from VS Code (Recommended)<br>If you're using VS Code with GitHub Copilot Chat, you can:<br>1. Click the "..." menu in the chat panel<br>2. Select ... | 🔧 copilot_createFile; ⚙️ {'value': 'Creating [](file:///tmp/edm_diffusion_model_vibe_coding/chat_history_edm_implementation.md)', 'supportThemeIcons': False, 'supportHtml': False, 'uris': {'file:///tmp/edm_diffusion_model_vibe_coding/chat_history_edm_implementation.md': {'$mid': 1, 'path': '/tmp/edm_diffusion_model_vibe_coding/chat_history_edm_implementation.md', 'scheme': 'file'}}}; 🔧 run_in_terminal; ⚙️ Using "Run in Terminal" |  |  |
 |   | | [.... Switched to google colab for running on their TPUs ....] |  |  |  |  |
 | 22 | Human/AI | Please add the appropriate device= and .to() expressions where needed to make as much as possible run on TPUs and GPUs | I will update the notebook to add .to(device) where necessary so it can run on CUDA. | [] |  |  |
-
+|   | | [Switched to a variety of windows with DeepSeek, Grok, ChatGPT] |  |  |  |  |
+| 23| Human/AI | I have my own folder of images.  They're larger than 64x64, so I would like to scale to that size.  The structure of the folder is label/filename.jpg, like cat/cat1.jpg  dog/husky.jpg | Got it 👍 Thanks for pasting that. Since you’ve got your own folder of labeled images, we can replace the MNIST dataset with torchvision.datasets.ImageFolder, and add resizing + normalization for RGB. Here’s how you can adapt your loader for 64×64 color images: | |  |  |
 
 ## Key Outcomes
 
