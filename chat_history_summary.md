@@ -42,6 +42,8 @@ The conversation involved implementing both DDPM and EDM diffusion models in a J
 | 27 || Sure | Perfect — let’s rewrite your EDM training loop [and WHOA! It went off the rails writing a DIFFERENT improved difusion model from based on other papers.  Worked, but not what I wanted] |  |  |
 | 27 || Waitasec... yours looks different than mine. Mine looked more complex like: ... could you compare and contrast the differences. I tried basing it on https://arxiv.org/pdf/2206.00364 | Ah — yes, now I see what’s happening. The difference comes down to how NVIDIA’s “Elucidated Diffusion Model” (EDM) does preconditioning versus a simpler “direct noise prediction” training loop. Let’s break it down carefully. ... The loop is already fully compatible with 64×64 RGB. |  |  |
 | 28 || Thanks!  It works! | | | |
+|    || [Playing with various data sets; manually debugging] | | | |
+| 29 || Hey.... in your latest model where you write:<br><br> u_final = F.interpolate(u1, size=x.shape[-2:], mode='bilinear', align_corners=False)<br> doesn't that make it stop caring about individual pixels -- which results in a bunch of one-pixel-sized speckley noise? | Ahh, great catch — you’re noticing one of the subtle pitfalls of upsampling with bilinear interpolation in U-Nets. ...That smooths out details, which is fine in classification models, but in generative models (diffusion) it can: blur fine structure, reduce pixel-level fidelity, and sometimes leave speckly artifacts when the network tries to “sharpen” details back in later layers. | | | |
 
 
 
