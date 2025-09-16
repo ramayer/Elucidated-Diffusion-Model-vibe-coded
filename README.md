@@ -1,41 +1,77 @@
-# 🧪 DIY Diffusion — A Vibe-Coded Fusion of Cutting-Edge Diffusion + Super-Resolution Techniques (NVIDIA EDM, SR3, Toyota SR)
+# 🧪 DIY Diffusion — A Vibe-Coded Fusion of Cutting-Edge Diffusion + Super-Resolution Techniques (Nvidia EDM, Google SR3, Toyota One Step SR)
 
-> *A hands-on exploration of how far you can go by translating ArXiv papers into working code — and then combining them into a single, unified diffusion model.*
+> *A hands-on exploration of how far you can go by translating multiple ArXiv papers into working code combining them into a single, unified diffusion pipeline.*
+
+<img src="./doc/example_output_1.png">
+<img src="./doc/example_output_2.png">
+<img src="./doc/example_output_3.png">
+<img src="./doc/example_output_4.png">
+<img src="./doc/example_output_5.png">
+<img src="./doc/example_output_6.png">
+<img src="./doc/example_dragon_1.png">
+<img src="./doc/example_dragon_2.png">
+<img src="./doc/example_dragon_3.png">
+<img src="./doc/example_dragon_4.png">
+<img src="./doc/example_dragon_5.png">
+<img src="./doc/example_dragon_6.png">
+
+All images in this readme were created by the code produced by the AIs in this project.
+
+---
+
+## 📌 TL/DR
+
+A few AIs were asked to find and read SOTA research papers and build something cool.  I think they found interesting novel synergies between these papers.
 
 ---
 
 ## 📌 Overview
 
-This project is a demonstration of what modern large language models can do when treated as autonomous research collaborators.
+This project is a demonstration of what modern large language models can do when treated as autonomous research collaborators.  Starting from a prompt like:
 
-Starting from the prompt  
-> “I’d like an interesting image-model project — diffusion models still feel like black boxes to me. Can you find papers that might help me understand them?”  
+* *“I’d like an interesting image-model project — diffusion models still feel like black boxes to me. Can you find papers that might help me understand them?”*
 
 …the AI systems (ChatGPT, Grok, DeepSeek, Claude) did the rest:
 
 - 🔍 Found (through web search), selected, and explained relevant diffusion papers  
-- 📖 Educated the human about the concepts, architecture, and background math from those papers  
+- 📖 Educated the human about the concepts, architecture, and math in those papers  
 - 🧮 Translated their core equations into working PyTorch code  
 - 🧬 Combined techniques from multiple papers into a unified design  
 - ⚡️ Iterated on architecture and hyperparameters through conversational debugging  
-- 🧠 Tuned architectural details (like which layers used attention) to fit the constraints of the human’s low-budget hardware  
+- 🧠 Tuned architectural details (like which layers use attention) to fit the constraints of the human’s low-budget hardware  
 - 🖼 Produced **two complementary diffusion models**:  
   - 🎨 **A generative model** for synthesizing novel images from pure noise  
   - 🔍 **A super-resolution model** that progressively refines low-resolution images into high-quality outputs
 
-The human role was minimal and mainly evaluative: supplying datasets and describing image outputs (“some are nice cats, others are eldritch cat-dogs”).
+The human role was minimal and mainly evaluative: supplying datasets and describing image outputs with prompts like:
+* ***“some are nice cats, others are eldritch cat-dogs”***    
+<img src="doc/eldritch_cat_dog.png">
+
+from which the AIs decided how to refine the model (in this case adding cross-attention to middle layers of the network to communicate information from more distant parts of an image).
 
 As such, this repository is less about diffusion models alone and more about **how far autonomous AI collaboration has come** — showing that LLMs can now move from **“papers on arXiv” to “working implementation”** with humans acting only as curators and qualitative critics.
 
 ## How This Project Took Shape
 
-This project began as an open-ended search for something visually ambitious enough to showcase what these AI collaborators could create, yet still just within the edge of what this human could follow. After exploring several possibilities together, three research papers emerged as particularly compelling foundations. They were chosen as complementary advancements in generative vision AIs, each complex enough to demand original reasoning and synthesis from the AIs, while remaining barely comprehensible to the human collaborator. By weaving ideas from these works into new implementations, the AIs didn’t simply “assist” in building a project — they envisioned and constructed one, with the human mostly running to keep up and marvel at how coherently it all fit together.
+This project began as an open-ended search for something visually ambitious enough to showcase what these AI collaborators could create, yet still just within the edge of what this human could follow. After exploring several possibilities together, three research papers emerged as particularly compelling foundations. 
 
-- [**EDM (NVIDIA)** — *Elucidating the Design Space of Diffusion-Based Generative Models*](https://arxiv.org/abs/2206.00364)  
+- [**EDM (Nvidia)** — *Elucidating the Design Space of Diffusion-Based Generative Models*](https://arxiv.org/abs/2206.00364)  
 - [**SR3 (Google)** — *Image Super-Resolution via Iterative Refinement*](https://arxiv.org/abs/2104.07636)
-- [**Efficient One-Step Diffusion (Toyota)** — *Efficient Burst Super-Resolution with One-step Diffusion*](https://arxiv.org/abs/2507.13607)  
+- [**Efficient One-Step Diffusion (Toyota)** — *Efficient Burst Super-Resolution with One-step Diffusion*](https://arxiv.org/abs/2507.13607)
+
+They were chosen as complementary advancements in generative vision AIs -- each complex enough to demand original reasoning and synthesis from the AIs -- while remaining barely comprehensible to the human collaborator. By weaving ideas from these works into new implementations, the AIs didn’t simply “assist” in building a project — they envisioned and constructed one, with the human mostly running to keep up and marvel at how coherently it all fit together.
 
 ### 🔬 NVIDIA EDM Deep Dive
+
+The NVidia Paper *Elucidating the Design Space of Diffusion-Based Generative Models* studied the theoretical statistical math behind diffusion layers, and proposed a number of math-backed techniques to quantify what has traditionally been anecdotal arbitrary guesses in diffusion model software.  A great way to observe its benefits is to compare how fast EDM based models converge compared to traditional DDPM based diffusion models.
+
+**Images generated from the baseline traditional DDPM diffusion model after training on MNIST for >1000 seconds.**    
+<img src="./doc/output_from_traditional_DDPM.png">
+
+**Images generated from this EDM diffusion model after training on MNIST for 240 seconds.**    
+<img src="./doc/output_from_EDM.png">
+
+Note that it's totally acceptable that this model is hallucinating new digits.  The entire point to such diffusion models is to hallucinate new cats, dogs, dragons, wizards, whatever, from 100% random noise.  Both models can be found self-contained in the jupyter notebook [here](./diffusion_model_demo.ipynb) and a slightly more elaborate example [here](./mnist_EDM-vs-DPPM_with_attention_blocks.ipynb) showing the quality of results of a EDM and DPPM model at matching timesteps.
 
 #### 1. Preconditioning & σ-dependent skip
 
@@ -101,6 +137,17 @@ The combination of σ-dependent preconditioning and the carefully tuned stochast
 
 After building a generative diffusion model producing 64×64 images, we wanted to push beyond the limitations of our hardware without losing image quality. This is where **SR3 (Image Super-Resolution via Iterative Refinement, Google 2021)** came in. SR3 extends the diffusion framework to super-resolution by treating a low-resolution image as a noisy observation and applying a **progressive denoising process** to reconstruct the high-resolution counterpart.
 
+Consider this diagram showing the intermediate states while training: 
+
+<img src="doc/SuperResolution-intermediate-states.png">
+
+* Given the low-res input image [leftmost]
+* Create a high-res noised version of the image [second from the left]
+* And train a model to predict the noise that needs to be removed [middle]
+* Which identifies changes needed [second from right]
+* To reconstruct the high-res image.
+
+
 #### 1. Core Idea: Conditional Diffusion
 
 SR3 frames super-resolution as a **conditional generation problem**: given a low-resolution image $x_\text{LR}$, the model predicts a high-resolution image $x_\text{HR}$ through iterative refinement. At each timestep $t$, Gaussian noise $n_t \sim \mathcal{N}(0, \sigma_t^2)$ is added to the high-resolution target, and the network learns to denoise it conditioned on $x_\text{LR}$:
@@ -144,23 +191,7 @@ While Toyota's method focuses on a **single-step diffusion process** starting fr
 
 ---
 
-## 🧠 Why This Is Interesting
 
-This project implements a fully functional **image-generating diffusion model** built by **vibe-coding core ideas directly from several landmark papers** and fusing them into one cohesive architecture:
-
-- [**EDM (NVIDIA)** — *Elucidating the Design Space of Diffusion-Based Generative Models*](https://arxiv.org/abs/2206.00364)  
-- [**SR3 (Google)** — *Image Super-Resolution via Iterative Refinement*](https://arxiv.org/abs/2104.07636)
-- [**Efficient One-Step Diffusion (Toyota)** — *Efficient Burst Super-Resolution with One-step Diffusion*](https://arxiv.org/abs/2507.13607)  
-
-The goal was to see how well modern LLMs (ChatGPT, Grok, DeepSeek, Claude) could collaborate in real time to build a complex diffusion pipeline — starting from paper formulas, not existing implementations.
-
-The result is a working, modular diffusion model capable of producing high-quality images from custom datasets.
-
-
-
-
-
----
 
 ## 🧠 Why This Is Interesting
 
@@ -257,23 +288,13 @@ jupyter lab
 - And the helpful insights of LLM collaborators — ChatGPT, Grok, DeepSeek, and Claude — which made vibe-coding this system possible
 
 ---
-### Images generated from the baseline traditional DDPM
 
-<img src="./doc/output_from_traditional_DDPM.png">
-
-### Images generated by this comparable EDM
-
-<img src="./doc/output_from_EDM.png">
-
-### Code
-
-* Both models can be found self-contained in the jupyter notebook [here](./diffusion_model_demo.ipynb)
 
 ## Authors:
 
 * \> 95% vibe-coded by ChatGPT, Grok, Deepseek, and Claude.
   * Very few human-written lines of code here.
-  * Even the bug-fixes are largely copy&paste from different models.
+  * Even the bug-fixes are largely copy&paste from different chatbots.
   * Style changes are largely when different models were used for bug-fixes
 * See chat_history_summary.md for the prompts that started the project, leading to the first working model.
 
