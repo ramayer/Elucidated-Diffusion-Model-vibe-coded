@@ -2,18 +2,7 @@
 
 > *A hands-on exploration of how far you can go by translating multiple ArXiv papers into working code combining them into a single, unified diffusion pipeline.*
 
-<img src="./doc/example_output_1.png">
-<img src="./doc/example_output_2.png">
-<img src="./doc/example_output_3.png">
-<img src="./doc/example_output_4.png">
-<img src="./doc/example_output_5.png">
-<img src="./doc/example_output_6.png">
-<img src="./doc/example_dragon_1.png">
-<img src="./doc/example_dragon_2.png">
-<img src="./doc/example_dragon_3.png">
-<img src="./doc/example_dragon_4.png">
-<img src="./doc/example_dragon_5.png">
-<img src="./doc/example_dragon_6.png">
+<img src="./doc/example_output_1.png"><img src="./doc/example_output_2.png"><img src="./doc/example_output_3.png"><img src="./doc/example_output_4.png"><img src="./doc/example_output_5.png"><img src="./doc/example_output_6.png"><img src="./doc/example_dragon_1.png"><img src="./doc/example_dragon_2.png"><img src="./doc/example_dragon_3.png"><img src="./doc/example_dragon_4.png"><img src="./doc/example_dragon_5.png"><img src="./doc/example_dragon_6.png">
 
 All images in this readme were created by the code produced by the AIs in this project.
 
