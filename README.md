@@ -50,6 +50,8 @@ This project began as an open-ended search for something visually ambitious enou
 
 They were chosen as complementary advancements in generative vision AIs -- each complex enough to demand original reasoning and synthesis from the AIs -- while remaining barely comprehensible to the human collaborator. By weaving ideas from these works into new implementations, the AIs didn’t simply “assist” in building a project — they envisioned and constructed one, with the human mostly running to keep up and marvel at how coherently it all fit together.
 
+So, did the AIs create more than the sum of their parts?  I think so.  As far as I can tell, mixing the preconditioning and noise schedual of EDM with fast-start diffusion like Toyota's paper seems novel and better than other approaches!
+
 ### 🔬 NVIDIA EDM Deep Dive
 
 The NVidia Paper *Elucidating the Design Space of Diffusion-Based Generative Models* studied the theoretical statistical math behind diffusion layers, and proposed a number of math-backed techniques to quantify what has traditionally been anecdotal arbitrary guesses in diffusion model software.  A great way to observe its benefits is to compare how fast EDM based models converge compared to traditional DDPM based diffusion models.
