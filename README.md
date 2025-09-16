@@ -4,7 +4,7 @@
 
 <img src="./doc/example_output_1.png"><img src="./doc/example_output_2.png"><img src="./doc/example_output_3.png"><img src="./doc/example_output_4.png"><img src="./doc/example_output_5.png"><img src="./doc/example_output_6.png"><img src="./doc/example_dragon_1.png"><img src="./doc/example_dragon_2.png"><img src="./doc/example_dragon_3.png"><img src="./doc/example_dragon_4.png"><img src="./doc/example_dragon_5.png"><img src="./doc/example_dragon_6.png">
 
-All images in this readme were created by the code produced by the AIs in this project.
+All images in this readme were created by the code produced by the AIs in this project.  For more examples, see [here](outputs/fantasy_2025-09-12_13-14-42.html)
 
 ---
 
