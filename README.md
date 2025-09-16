@@ -40,7 +40,7 @@ from which the AIs decided how to refine the model (in this case adding cross-at
 
 As such, this repository is less about diffusion models alone and more about **how far autonomous AI collaboration has come** — showing that LLMs can now move from **“papers on arXiv” to “working implementation”** with humans acting only as curators and qualitative critics.
 
-## How This Project Took Shape
+## 🧩 How It Works
 
 This project began as an open-ended search for something visually ambitious enough to showcase what these AI collaborators could create, yet still just within the edge of what this human could follow. After exploring several possibilities together, three research papers emerged as particularly compelling foundations. 
 
@@ -51,6 +51,8 @@ This project began as an open-ended search for something visually ambitious enou
 They were chosen as complementary advancements in generative vision AIs -- each complex enough to demand original reasoning and synthesis from the AIs -- while remaining barely comprehensible to the human collaborator. By weaving ideas from these works into new implementations, the AIs didn’t simply “assist” in building a project — they envisioned and constructed one, with the human mostly running to keep up and marvel at how coherently it all fit together.
 
 So, did the AIs create more than the sum of their parts?  I think so.  As far as I can tell, mixing the preconditioning and noise schedual of EDM with fast-start diffusion like Toyota's paper seems novel and better than other approaches!
+
+
 
 ### 🔬 NVIDIA EDM Deep Dive
 
@@ -219,18 +221,22 @@ It demonstrates that the gap from **“research paper” to “running implement
 
 ## 🖼️ Sample Results
 
-| Early Training | Mid Training | Later Training |
-| --- | --- | --- |
-| ![early](./media/early.png) | ![mid](./media/mid.png) | ![late](./media/late.png) |
+And it was able to learn to draw cats and dogs on a cheap 6GB RAM GPU in a single night: 
+<img src="doc/cat_dog_evolution/2025-09-08_01-13-37.png">
+<img src="doc/cat_dog_evolution/2025-09-08_01-14-18.png">
+<img src="doc/cat_dog_evolution/2025-09-08_01-14-18.png">
+<img src="doc/cat_dog_evolution/2025-09-08_01-16-17.png">
+<img src="doc/cat_dog_evolution/2025-09-08_01-27-17.png">
+<img src="doc/cat_dog_evolution/2025-09-08_03-31-23.png">
+<img src="doc/cat_dog_evolution/2025-09-08_03-39-24.png">
+<img src="doc/cat_dog_evolution/2025-09-08_07-09-23.png">
+<img src="doc/cat_dog_evolution/2025-09-08_07-12-23.png">
+<img src="doc/cat_dog_evolution/2025-09-08_08-19-23.png">
+<img src="doc/cat_dog_evolution/2025-09-08_10-31-23.png">
+<img src="doc/cat_dog_evolution/2025-09-08_17-00-24.png">
+<img src="doc/cat_dog_evolution/2025-09-08_17-07-23.png">
 
-**Additional examples:**
-- **Super-resolution:** 28×28 → 256×256 MNIST digits  
-- **Cat vs dog dataset:** from nightmare hybrids → clean distinct animals  
-- **Baseline comparison:** naive DPPM vs EDM-style weighting
-
-> *“At epoch 3, we got a cat with 3 heads. By epoch 12, it was just a cat — and a cute one.”*
-
----
+--
 
 ## 🧩 How It Works
 
