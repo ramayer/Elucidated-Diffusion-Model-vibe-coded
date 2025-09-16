@@ -238,24 +238,7 @@ And it was able to learn to draw cats and dogs on a cheap 6GB RAM GPU in a singl
 
 --
 
-## 🧩 How It Works
 
-Conceptually, the model integrates these pieces:
-
-- **Noise schedule (EDM)**  
-  - σ-space parameterization with optimal weighting  
-  - Core objective:  
-    ```
-    𝔼[λ(σ) ||F_θ(c_in(σ)·y; c_noise(σ)) - c_out(σ)·y||²]
-    ```
-- **Sampling (EDM ancestral)**  
-  - Adjustable “headstart” noise level for faster convergence
-- **Refinement stages (SR3)**  
-  - Progressive super-resolution jumps (e.g. 32→128→256 px)
-- **One-step mode (Toyota)**  
-  - Optional fast path for quick previews
-
----
 
 ## ⚙️ Requirements
 
