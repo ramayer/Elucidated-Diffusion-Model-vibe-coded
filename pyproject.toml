@@ -1,12 +1,67 @@
 [project]
-name = "Elucidated-Diffusion-Model-vibe-coded"
-version = "0.1.0"
-description = "Add your description here"
+name = "elucidated-diffusion"
+dynamic = ["version"]
+description = "Vibe-coded implementation of Nvidia Elucidated Diffusion Paper"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    'torch','torchvision',
-    'tqdm','matplotlib','Pillow',
-    'opencv-contrib-python','opencv-python',
-    'torchview','objgraph'
+    'torch',
+    'torchvision',
+    'tqdm',
+    'matplotlib',
+    'Pillow',
+    'opencv-contrib-python',
+    'opencv-python',
+    'torchview',
+    'objgraph',
 ]
+keywords = []
+authors = [
+  { name = "ChatGPT, DeepSeek, Grok, Claud, and Ron M", email = "ramayer+git@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.urls]
+Documentation = "https://github.com/ramayer/elucidated-diffusion#readme"
+Issues = "https://github.com/ramayer/elucidated-diffusion/issues"
+Source = "https://github.com/ramayer/elucidated-diffusion"
+
+[tool.hatch.version]
+path = "src/elucidated_diffusion/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/elucidated_diffusion tests}"
+
+[tool.coverage.run]
+source_pkgs = ["elucidated_diffusion", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/elucidated_diffusion/__about__.py",
+]
+
+[tool.coverage.paths]
+elucidated_diffusion = ["src/elucidated_diffusion", "*/elucidated-diffusion/src/elucidated_diffusion"]
+tests = ["tests", "*/elucidated-diffusion/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
