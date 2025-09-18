@@ -27,7 +27,6 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
