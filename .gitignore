@@ -1,3 +1,10 @@
 outputs/
 data/
 checkpoints/
+uv.lock
+__pycache__/
+.ipynb_checkpoints/
+.vscode/
+tmp/
+dist/
+*.bak
