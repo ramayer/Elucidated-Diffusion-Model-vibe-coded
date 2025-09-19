@@ -101,7 +101,7 @@ class UNetSR3(nn.Module):
 
 # Sanity check the model's inpus and outputs are as expected
 #   Add similar to the pytest for your project
-if sanity_check_model := True:
+if sanity_check_model := False:
     B = 4
     hrimg = torch.randn(B, 3, 256, 256).cuda()
     lrimg = torch.randn(B, 3, 64, 64).cuda()

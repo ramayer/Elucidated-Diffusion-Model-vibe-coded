@@ -7,13 +7,19 @@ from torch import Tensor
 import torchvision.transforms as transforms
 
 
-def sr_to_pil(sr_tensor: Tensor) -> PILImage.Image:
+def sr_to_pil_legacy(sr_tensor: Tensor) -> PILImage.Image:
     """sr_tensor: [3,H,W] or [B,3,H,W] float in [-1,1] returns: PIL Image (RGB)"""
     if sr_tensor.dim() == 4:
         sr_tensor = sr_tensor[0] # first in batch
     sr_tensor = ((sr_tensor.clamp(-1, 1) + 1) * 127.5).to(torch.uint8)
     sr_np = sr_tensor.permute(1,2,0).cpu().numpy()
     return Image.fromarray(sr_np)
+
+def sr_to_pil(sr_tensor: Tensor) -> PILImage.Image:
+    to_pil = transforms.ToPILImage()
+    sr_tensor = (sr_tensor + 1) / 2  # scale from [-1,1] to [0,1]
+    sr_tensor = sr_tensor.clamp(0, 1)
+    return to_pil(sr_tensor)
 
 def pil_to_data_url(pil_img: PILImage.Image) -> str:
     buffered = io.BytesIO()
