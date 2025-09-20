@@ -153,7 +153,19 @@ class ResBlock(nn.Module):
         return h + self.res_conv(x)
 
 class CrossAttentionFusion(nn.Module):
-    """Cross-attention between UNet features and ViT structure features"""
+    """
+    Cross-attention between UNet features and ViT conditioning features.
+    
+    Strengths:
+    - Flexible attention patterns - can learn complex spatial relationships
+    - Theoretically most expressive fusion method
+    
+    Weaknesses:  
+    - Many parameters (~50K per fusion point) - slow to train
+    - Complex optimization landscape - often fails to learn meaningful patterns
+    - Requires learning both WHAT to attend to and HOW to attend
+    - Memory intensive due to attention matrix computation
+    """
     def __init__(self, unet_dim, vit_dim, num_heads=8):
         super().__init__()
         self.num_heads = num_heads
@@ -194,12 +206,107 @@ class CrossAttentionFusion(nn.Module):
         out = (attn @ v).transpose(-2, -1)
         out = out.contiguous().view(B, C_u, H_u, W_u)
         out = self.to_out(out)
-        
+        # see https://claude.ai/share/64c68f34-8d47-4753-839a-7a24da388c85
+        #     with torch.no_grad():
+        #         attn_detached = attn.detach().cpu()
+        #         entropy = -(attn_detached * attn_detached.log()).sum(dim=-1).mean().item()
+        #         print(f"Attention entropy (step {self.debug_counter}): {entropy}")
         return unet_feat + out
 
-class HybridViTUNetSR(nn.Module):
-    def __init__(self, in_ch=3, out_ch=3, base_ch=64, time_emb_dim=128):
+
+class SimpleFusion(nn.Module):
+    """
+    Simple addition-based fusion with 1x1 projection.
+    
+    Strengths:
+    - Fast training - direct information flow with no learning barriers
+    - Few parameters (~1K per fusion point) - memory efficient
+    - Stable optimization - just learns a projection matrix
+    - Preserves spatial correspondence perfectly
+    
+    Weaknesses:
+    - No spatial context - each UNet region only sees its own ViT patch
+    - May struggle with fine details requiring neighbor information
+    - Limited expressiveness compared to attention mechanisms
+    """
+    def __init__(self, unet_dim, vit_dim):
         super().__init__()
+        self.proj = nn.Conv2d(vit_dim, unet_dim, kernel_size=1)
+        
+    def forward(self, unet_feat, vit_feat):
+        """
+        Args:
+            unet_feat: UNet features [B, unet_dim, H, W]
+            vit_feat: ViT features [B, vit_dim, H_v, W_v]
+        Returns:
+            Fused features [B, unet_dim, H, W]
+        """
+        B, C_u, H_u, W_u = unet_feat.shape
+        B, C_v, H_v, W_v = vit_feat.shape
+        
+        # Upsample ViT features to match UNet spatial resolution if needed
+        if (H_v, W_v) != (H_u, W_u):
+            vit_resized = F.interpolate(vit_feat, size=(H_u, W_u), mode='nearest')
+        else:
+            vit_resized = vit_feat
+            
+        # Project ViT features to match UNet channel dimension
+        vit_proj = self.proj(vit_resized)
+        
+        # Simple addition fusion
+        return unet_feat + vit_proj
+
+class NeighborAwareFusion(nn.Module):
+    """
+    Addition-based fusion with 3x3 projection for spatial context.
+    
+    Strengths:
+    - Fast training like SimpleFusion but with spatial awareness
+    - Each UNet region sees its ViT patch + 8 neighbors
+    - Good for fine details requiring local spatial relationships (e.g., faces)
+    - Still lightweight (~9K parameters per fusion point)
+    
+    Weaknesses:  
+    - Only sees immediate neighbors - limited spatial range
+    - More parameters than SimpleFusion (but far fewer than CrossAttention)
+    - May still struggle with very long-range spatial dependencies
+
+    Details:
+    - Parameter count: 9K (vs SimpleFusion's 1K vs CrossAttention's 50K+)
+    - Spatial awareness: 3×3 receptive field per region
+    - Training speed: Should be nearly as fast as SimpleFusion
+
+    For faces, that 3×3 neighborhood might be exactly what you need - a "left eye" region 
+    can now see information from "nose", "right eye", and "forehead" patches to help 
+    with precise facial geometry.
+    """
+    def __init__(self, unet_dim, vit_dim):
+        super().__init__()
+        # 3x3 conv gives each region access to its patch + 8 neighbors
+        self.proj = nn.Conv2d(vit_dim, unet_dim, kernel_size=3, padding=1)
+        # Smaller initial weights for the 3x3 conv: nn.init.xavier_normal_(self.proj.weight, gain=0.1)
+        nn.init.xavier_normal_(self.proj.weight, gain=0.1)
+        
+    def forward(self, unet_feat, vit_feat):
+        B, C_u, H_u, W_u = unet_feat.shape
+        B, C_v, H_v, W_v = vit_feat.shape
+        
+        # Upsample ViT features to match UNet spatial resolution
+        if (H_v, W_v) != (H_u, W_u):
+            vit_resized = F.interpolate(vit_feat, size=(H_u, W_u), mode='nearest')
+        else:
+            vit_resized = vit_feat
+            
+        # Project with 3x3 conv (spatial context) and add
+        vit_proj = self.proj(vit_resized)  # Each pixel sees neighbors
+        return unet_feat + vit_proj
+
+class HybridViTUNetSR(nn.Module):
+    def __init__(self, in_ch=3, out_ch=3, base_ch=64, time_emb_dim=128,
+                 fusion_style="SimpleFusion"):
+        super().__init__()
+
+        self.fusion_style = fusion_style
         
         # Time embedding
         self.time_emb = nn.Sequential(
@@ -219,9 +326,18 @@ class HybridViTUNetSR(nn.Module):
         self.enc4 = ResBlock(base_ch * 4, base_ch * 8, time_emb_dim)  # 32x32
         
         # Cross-attention fusion modules
-        self.cross_attn_64 = CrossAttentionFusion(base_ch * 4, 256)  # 64x64 level
-        self.cross_attn_32 = CrossAttentionFusion(base_ch * 8, 128)  # 32x32 level  
-        self.cross_attn_16 = CrossAttentionFusion(base_ch * 8, 512)  # 16x16 bottleneck
+        if self.fusion_style=="CrossAttention":
+            self.fusion_64 = CrossAttentionFusion(base_ch * 4, 256)  # 64x64 level
+            self.fusion_32 = CrossAttentionFusion(base_ch * 8, 128)  # 32x32 level  
+            self.fusion_16 = CrossAttentionFusion(base_ch * 8, 512)  # 16x16 bottleneck
+        elif self.fusion_style=="NeighborAwareFusion":
+            self.fusion_64 = NeighborAwareFusion(base_ch * 4, 256)  # 64x64 level
+            self.fusion_32 = NeighborAwareFusion(base_ch * 8, 128)  # 32x32 level  
+            self.fusion_16 = NeighborAwareFusion(base_ch * 8, 512)  # 16x16 bottleneck
+        else:
+            self.fusion_64 = SimpleFusion(base_ch * 4, 256)  # 64x64 level
+            self.fusion_32 = SimpleFusion(base_ch * 8, 128)  # 32x32 level  
+            self.fusion_16 = SimpleFusion(base_ch * 8, 512)  # 16x16 bottleneck
         
         # Bottleneck
         self.mid = ResBlock(base_ch * 8, base_ch * 8, time_emb_dim)
@@ -255,13 +371,13 @@ class HybridViTUNetSR(nn.Module):
         e3 = self.enc3(self.down(e2), t_emb)   # [B, 256, 64, 64]
         e4 = self.enc4(self.down(e3), t_emb)   # [B, 512, 32, 32]
         
-        # Fuse UNet features with ViT structure features via cross-attention
-        e3_fused = self.cross_attn_64(e3, structure_feats['64x64'])  # Global structure -> local 64x64
-        e4_fused = self.cross_attn_32(e4, structure_feats['32x32'])  # Global structure -> local 32x32
-        
+        # Fuse UNet features with ViT structure features, optionally via cross-attention
+        e3_fused = self.fusion_64(e3, structure_feats['64x64'])  # Global structure -> local 64x64
+        e4_fused = self.fusion_32(e4, structure_feats['32x32'])  # Global structure -> local 32x32
+
         # Bottleneck with structure fusion
         m = self.mid(self.down(e4_fused), t_emb)  # [B, 512, 16, 16]
-        m_fused = self.cross_attn_16(m, structure_feats['16x16'])  # Global structure -> bottleneck
+        m_fused = self.fusion_16(m, structure_feats['16x16'])  # Global structure -> bottleneck
         
         # Decoder path
         d4 = self.dec4(torch.cat([self.up(m_fused), e4_fused], dim=1), t_emb)
