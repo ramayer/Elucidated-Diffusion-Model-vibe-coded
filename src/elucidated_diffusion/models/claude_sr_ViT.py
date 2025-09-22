@@ -317,8 +317,14 @@ class HybridViTUNetSR(nn.Module):
         )
         
         # ViT for LR structure understanding
-        self.structure_vit = StructureViT(img_size=64, embed_dim=384, depth=6)
-        
+        #self.structure_vit = StructureViT(img_size=64, embed_dim=384, depth=6)
+        ## TODO - change this back -- patch size of 8 was horrible
+        #self.structure_vit = StructureViT(img_size=64, embed_dim=384, depth=6, patch_size=8)
+        """
+        With 8x8 patches it's drastically worse.  Faces are twisted like in funny room mirrors.  Some monster-like faces on human images.  Features like horns and scales mostly replaced with lumps that look like rendered clay.    Most animals not recognizable anymore.  And it hasn't improved for the past 4 hours (ran 8 hours so far).
+        """
+        self.structure_vit = StructureViT(img_size=64, embed_dim=384, depth=6, patch_size=2)
+
         # UNet for HR processing
         self.enc1 = ResBlock(in_ch, base_ch, time_emb_dim)      # 256x256
         self.enc2 = ResBlock(base_ch, base_ch * 2, time_emb_dim)  # 128x128
