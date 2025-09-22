@@ -61,6 +61,8 @@ So, did the AIs create more than the sum of their parts?  I think so.  As far as
 
 The NVidia Paper *Elucidating the Design Space of Diffusion-Based Generative Models* studied the theoretical statistical math behind diffusion layers, and proposed a number of math-backed techniques to quantify what has traditionally been anecdotal arbitrary guesses in diffusion model software.  A great way to observe its benefits is to compare how fast EDM based models converge compared to traditional DDPM based diffusion models.
 
+A [standalone (no dependencies beyond pytorch) comparison notebook for EDM vs DDPM on MNIST generated for this project can be found here](notebooks/standalone_edm_vs_ddpm_diffusion_model_demo.ipynb).
+
 **Images generated from the baseline traditional DDPM diffusion model after training on MNIST for >1000 seconds.**    
 <img src="./doc/output_from_traditional_DDPM.png">
 
