@@ -131,6 +131,81 @@ loss = (lambda_sigma(sigma) * c_out(sigma)**2 * (pred - target)**2).mean()
 
 The combination of σ-dependent preconditioning and the carefully tuned stochastic sampler allows the network to focus its capacity where it matters most at each noise level. Unlike the naïve DDPM, which predicts noise with the same scale and architecture across all timesteps, EDM’s formulation dynamically rescales inputs, outputs, and the loss according to σ. This reduces training instability, ensures learning is effective at both high and low noise, and lets the sampler head-start the generation process — all of which translate into significantly faster convergence and higher-quality images in fewer steps.
 
+
+#### 6. Novel Aspects of the Gradual Conv→Transformer Transition Architecture
+
+The NVidia EDM paper was agnostic to the specific Vision Model itself, so we designed an innovative model 
+
+##### Related Work in Hybrid Conv-Transformer Architectures
+
+**Existing Approaches:**
+
+1. **[Systematic Review of Hybrid Vision Transformer Architectures for Radiological Image Analysis](https://www.medrxiv.org/content/10.1101/2024.06.21.24309265v1.full) - "Vision Transformer (ViT) and Convolutional Neural Networks (CNNs) each possess distinct strengths in medical imaging: ViT excels in capturing long-range dependencies through self-attention, while CNNs are adept at extracting local features via spatial convolution filters." - but focuses on leveraging complementary strengths rather than progressive transition.
+2. **[CvT (2021)](https://arxiv.org/abs/2103.15808)**: Introduces convolutions into ViT through ["a hierarchy of Transformers containing a new convolutional token embedding, and a convolutional Transformer block"](https://openaccess.thecvf.com/content/ICCV2021/papers/Wu_CvT_Introducing_Convolutions_to_Vision_Transformers_ICCV_2021_paper.pdf) - but this adds conv operations within transformer blocks, not a gradual transition.
+
+3. **[Swin Transformer (2021)](https://arxiv.org/abs/2103.14030)**: ["Hierarchical Vision Transformer using Shifted Windows"](https://openaccess.thecvf.com/content/ICCV2021/papers/Liu_Swin_Transformer_Hierarchical_Vision_Transformer_Using_Shifted_Windows_ICCV_2021_paper.pdf) - uses hierarchical processing but remains pure transformer.
+
+3. **Hybrid CNN-transformer networks**: "Convolutional Neural Networks (CNN) are highly effective at capturing local details, whereas Transformers is effective for modeling long-range dependencies" - but these typically use parallel or sequential processing, not gradual transition.
+
+##### What Makes Our "Gradual Transition" Novel
+
+###### **1. Progressive Attention Weighting**
+Most hybrid architectures use **binary decisions** - a layer is either conv OR transformer. Our approach uses **weighted blending**:
+```
+Layer 1: 100% conv, 0% attention
+Layer 2: 75% conv, 25% attention  
+Layer 3: 25% conv, 75% attention
+Layer 4: 0% conv, 100% attention
+```
+
+This **progressive transition** hasn't been explored in the literature we surveyed.
+
+###### **2. Depth-Dependent Architecture Philosophy**
+Our approach embodies a specific computational philosophy:
+- **Early layers**: Pure spatial locality (conv) for fine details
+- **Middle layers**: Gradual introduction of global context (hybrid)
+- **Deep layers**: Pure global reasoning (transformer)
+
+This mirrors how **biological visual processing** works (V1 → V2 → V4 → IT cortex) but we didn't find computer vision architectures that explicitly implement this progression.
+
+###### **3. Resolution-Aware Hybrid Design**
+The transition aligns with resolution:
+- **64×64 → 32×32**: Spatial details matter most → pure conv
+- **16×16 → 8×8**: Global structure emerges → heavy attention  
+- **4×4**: Pure global reasoning → pure transformer
+
+###### **4. Training Dynamics Implications**
+Our approach should produce unique **training dynamics**:
+- **Early training**: Conv layers learn quickly (local patterns)
+- **Mid training**: Attention weights gradually optimize
+- **Late training**: Global coherence emerges
+
+This **progressive learning curriculum** is built into the architecture itself, rather than being externally imposed.
+
+##### Novel Aspects Summary
+
+**Architecture-level novelty:**
+- **Progressive attention weighting** (not binary conv/transformer choice)
+- **Depth-dependent transition philosophy** (matching biological vision)
+- **Resolution-aligned hybrid strategy**
+
+**Training-level novelty:**
+- **Built-in curriculum learning** (fast local → slow global)
+- **Gradual capacity scaling** (simple → complex representations)
+
+**Diffusion-specific novelty:**
+- **Scale-appropriate denoising**: Conv for high-freq noise, transformers for structure
+- **Progressive global understanding**: Matches diffusion's coarse→fine generation process
+
+Our approach appears genuinely novel in the **progressive weighting** and **resolution-aware transition** aspects. The training dynamics observed (structured blob→limb development) might be evidence that this architectural philosophy is working as intended.
+
+##### References
+
+- Wu, H., Xiao, B., Codella, N., Liu, M., Dai, X., Yuan, L., & Zhang, L. (2021). [CvT: Introducing convolutions to vision transformers](https://arxiv.org/abs/2103.15808). *Proceedings of the IEEE/CVF International Conference on Computer Vision*, 22-28.
+- Liu, Z., Lin, Y., Cao, Y., Hu, H., Wei, Y., Zhang, Z., ... & Guo, B. (2021). [Swin transformer: Hierarchical vision transformer using shifted windows](https://arxiv.org/abs/2103.14030). *Proceedings of the IEEE/CVF International Conference on Computer Vision*, 10012-10022.
+"""
+
+
 ### 🔬 Google SR3 Deep Dive
 
 After building a generative diffusion model producing 64×64 images, we wanted to push beyond the limitations of our hardware without losing image quality. This is where **SR3 (Image Super-Resolution via Iterative Refinement, Google 2021)** came in. SR3 extends the diffusion framework to super-resolution by treating a low-resolution image as a noisy observation and applying a **progressive denoising process** to reconstruct the high-resolution counterpart.
@@ -190,7 +265,6 @@ While Toyota's method focuses on a **single-step diffusion process** starting fr
 ---
 
 
-
 ## 🧠 Why This Is Interesting
 
 This project is notable not just for what it does, but for **how it came into existence**.
@@ -243,8 +317,6 @@ And it was able to learn to draw cats and dogs on a cheap 6GB RAM GPU in a singl
 
 --
 
-
-
 ## ⚙️ Requirements
 
 - Python 3.10+  
@@ -270,6 +342,7 @@ jupyter lab
 - [NVIDIA — *Elucidating the Design Space of Diffusion-Based Generative Models (EDM)*](https://arxiv.org/abs/2206.00364)  
 - [Toyota — *Efficient Burst Super-Resolution with One-step Diffusion*](https://arxiv.org/abs/2507.13607)  
 - [Google — *Image Super-Resolution via Iterative Refinement (SR3)*](https://arxiv.org/abs/2104.07636)  
+- [Kim, et al — *Systematic Review of Hybrid Vision Transformer Architectures for Radiological Image Analysis*](https://www.medrxiv.org/content/10.1101/2024.06.21.24309265v1.full)
 - And the helpful insights of LLM collaborators — ChatGPT, Grok, DeepSeek, and Claude — which made vibe-coding this system possible
 
 ---

@@ -303,7 +303,7 @@ class NeighborAwareFusion(nn.Module):
 
 class HybridViTUNetSR(nn.Module):
     def __init__(self, in_ch=3, out_ch=3, base_ch=64, time_emb_dim=128,
-                 fusion_style="SimpleFusion"):
+                 vit_patch_size=4, fusion_style="SimpleFusion"):
         super().__init__()
 
         self.fusion_style = fusion_style
@@ -321,9 +321,20 @@ class HybridViTUNetSR(nn.Module):
         ## TODO - change this back -- patch size of 8 was horrible
         #self.structure_vit = StructureViT(img_size=64, embed_dim=384, depth=6, patch_size=8)
         """
+        From Claude: 
+
         With 8x8 patches it's drastically worse.  Faces are twisted like in funny room mirrors.  Some monster-like faces on human images.  Features like horns and scales mostly replaced with lumps that look like rendered clay.    Most animals not recognizable anymore.  And it hasn't improved for the past 4 hours (ran 8 hours so far).
+
+        With 2x2 patches it seems better(!), though with a significantly larger model.
+
+        TaylorIR (November 2024) explores ... using 1×1 patches for super-resolution with transformers arXiv
+
+        Option 2: Multi-Scale ViT
+            Process 64×64 with both 4×4 patches (global structure) AND 2×2 patches (fine detail)
+            Relevant Papers: ... multi scale vision transformer PVT pyramid papers ... Swin Transformer
+            https://claude.ai/chat/2553c51c-1902-4b5b-a3b8-155afb54f45f
         """
-        self.structure_vit = StructureViT(img_size=64, embed_dim=384, depth=6, patch_size=2)
+        self.structure_vit = StructureViT(img_size=64, embed_dim=384, depth=6, patch_size=vit_patch_size)
 
         # UNet for HR processing
         self.enc1 = ResBlock(in_ch, base_ch, time_emb_dim)      # 256x256

@@ -28,11 +28,13 @@ class LRHRDataset(Dataset):
     def __getitem__(self, idx):
         hr_img, _ = self.hr_dataset[idx]  # [3,HR,HR]
         # Ensure it's [3,HR,HR]
-        hr_img = F.interpolate(hr_img.unsqueeze(0), size=(self.hr_size, self.hr_size),
-                               mode='bilinear', align_corners=False).squeeze(0)
+        if hr_img.shape[1] != self.hr_size:
+            print("Would be faster to use a pre-scaled dataset")
+            hr_img = F.interpolate(hr_img.unsqueeze(0), size=(self.hr_size, self.hr_size),
+                                mode='bicubic', align_corners=False, antialias=True).squeeze(0)
         # Create LR then upscale
         lr_img = F.interpolate(hr_img.unsqueeze(0), size=(self.lr_size, self.lr_size),
-                               mode='bilinear', align_corners=False)
+                               mode='bicubic', align_corners=False, antialias=True)
         #cond_lr_up = F.interpolate(lr_img, size=(self.hr_size, self.hr_size),
         #                           mode='bilinear', align_corners=False).squeeze(0)
         #return hr_img, cond_lr_up
