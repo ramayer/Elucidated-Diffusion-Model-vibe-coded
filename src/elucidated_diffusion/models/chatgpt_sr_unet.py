@@ -66,11 +66,19 @@ class UNetSR3(nn.Module):
         self.down = nn.AvgPool2d(2)
         self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
 
-    def forward(self, x, t):
+    def forward(self, x_noisy, lr_img, t):
         """
-        x: [B, 6, 256, 256] = concat([x_noisy, lr_upsampled])
-        t: [B] float timesteps normalized to [0,1]
+        x_noisy: [B, 3, 256, 256] - noisy HR image
+        lr_img: [B, 3, 64, 64] - LR conditioning image
+        t: [B] - timesteps
         """
+        lr_up = F.interpolate(lr_img, size=x_noisy.shape[-2:], mode='bilinear', align_corners=False)
+        x = torch.cat([x_noisy, lr_up], dim=1) 
+    #def forward(self, x, t):
+    #    """
+    #    x: [B, 6, 256, 256] = concat([x_noisy, lr_upsampled])
+    #    t: [B] float timesteps normalized to [0,1]
+    #    """
         # ---- time embedding ----
         t_emb = self.time_emb(t)  # [B, time_emb_dim]
 
